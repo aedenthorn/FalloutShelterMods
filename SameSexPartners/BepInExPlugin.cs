@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace SameSexPartners
 {
-    [BepInPlugin("aedenthorn.SameSexPartners", "Same Sex Partners", "0.2.0")]
+    [BepInPlugin("aedenthorn.SameSexPartners", "Same Sex Partners", "0.2.1")]
     public class BepInExPlugin: BaseUnityPlugin
     {
         public static BepInExPlugin context;
@@ -66,6 +66,35 @@ namespace SameSexPartners
             }
         }
 
+
+        [HarmonyPatch(typeof(GeneralQuestParameters), nameof(GeneralQuestParameters.CalculateQAL))]
+        public static class GeneralQuestParameters_CalculateQAL_Patch
+        {
+
+            public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+            {
+                Dbgl($"Transpiling GeneralQuestParameters.CalculateQAL");
+                var codes = new List<CodeInstruction>(instructions);
+                for (int i = 0; i < codes.Count; i++)
+                {
+                    if (codes[i].opcode == OpCodes.Call && codes[i].operand is MethodInfo info && info.Name == "GetQALParameter")
+                    {
+                        Dbgl("adding dweller limit");
+                        codes.Insert(i, new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(BepInExPlugin), nameof(BepInExPlugin.LimitDwellers))));
+                        break;
+                    }
+                }
+
+
+                return codes.AsEnumerable();
+            }
+        }
+
+        private static int LimitDwellers(int value)
+        {
+            return Math.Min(value, 200);
+        }
+
         [HarmonyPatch(typeof(DwellerSpawner), nameof(DwellerSpawner.CreateWaitingDweller))]
         public static class DwellerSpawner_CreateWaitingDweller_Patch
         {
@@ -73,6 +102,44 @@ namespace SameSexPartners
             {
                 if(modEnabled.Value && overrideSex.Value != EGender.Any)
                     gender = overrideSex.Value;
+            }
+        }
+
+        [HarmonyPatch(typeof(DwellerManager), nameof(DwellerManager.FindLegendaryDwellerData))]
+        public static class DwellerManager_FindLegendaryDwellerData_Patch
+        {
+            public static void Postfix(DwellerManager __instance, ref string assetName, ref UniqueDwellerData __result)
+            {
+                if (__result == null)
+                {
+                    __result = __instance.GetUniqueDwellerData(EDwellerRarity.Legendary, false);
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(DwellerManager), nameof(DwellerManager.FindRareDwellerData))]
+        public static class DwellerPool_FindRareDwellerData_Patch
+        {
+            public static void Postfix(DwellerManager __instance, string assetName, UniqueDwellerData[] ___m_rareDwellers, ref UniqueDwellerData __result)
+            {
+                if (__result == null)
+                {
+                    if (__result == null)
+                    {
+                        __result = __instance.GetUniqueDwellerData(EDwellerRarity.Rare, false);
+                    }
+                }
+            }
+        }
+        [HarmonyPatch(typeof(DwellerManager), nameof(DwellerManager.FindSpecialDwellerData))]
+        public static class DwellerPool_FindSpecialDwellerData_Patch
+        {
+            public static void Postfix(DwellerManager __instance, string assetName, UniqueDwellerData[] ___m_customDwellers, ref UniqueDwellerData __result)
+            {
+                if (__result == null)
+                {
+                    __result = __instance.GetUniqueDwellerData(EDwellerRarity.Rare, false);
+                }
             }
         }
 
@@ -126,7 +193,7 @@ namespace SameSexPartners
         {
             public static void Prefix(ref EGender gender, ref EDwellerRarity rarity)
             {
-                if (modEnabled.Value && overrideSex.Value != EGender.Any)
+                if (modEnabled.Value && overrideSex.Value != EGender.Any && (overrideSpecialDwellers.Value || !Environment.StackTrace.Contains("CreateSpecialDweller")))
                     gender = overrideSex.Value;
             }
         }
