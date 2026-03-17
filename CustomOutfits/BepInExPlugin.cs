@@ -15,8 +15,8 @@ using static RecipeList;
 
 namespace CustomOutfits
 {
-    [BepInPlugin("aedenthorn.CustomOutfits", "Custom Outfits", "0.1.0")]
-    public class BepInExPlugin: BaseUnityPlugin
+    [BepInPlugin("aedenthorn.CustomOutfits",", "Custom Outfits", "2.2.1")]
+    public class BepInExPlugin : BaseUnityPlugin
     {
         public static BepInExPlugin context;
 
