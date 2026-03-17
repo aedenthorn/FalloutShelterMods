@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace SameSexPartners
 {
-    [BepInPlugin("aedenthorn.SameSexPartners", "Same Sex Partners", "0.2.1")]
+    [BepInPlugin("aedenthorn.SameSexPartners", "Same Sex Partners", "0.3.0")]
     public class BepInExPlugin: BaseUnityPlugin
     {
         public static BepInExPlugin context;
@@ -162,7 +162,7 @@ namespace SameSexPartners
         [HarmonyPatch(typeof(DwellerManager), nameof(DwellerManager.GetUniqueDwellerData), new Type[] { typeof(EDwellerRarity), typeof(bool) })]
         public static class DwellerManager_GetUniqueDwellerData_Patch
         {
-            public static bool Prefix(DwellerManager __instance, ShuffleBag<UniqueDwellerData> ___m_rareDwellerShuffle, ShuffleBag<UniqueDwellerData> ___m_legendaryDwellersShuffle, EDwellerRarity rarity, bool includeAll, ref UniqueDwellerData __result)
+            public static bool Prefix(DwellerManager __instance, ShuffleBag<UniqueDwellerData> ___m_rareDwellerShuffle, ShuffleBag<UniqueDwellerData> ___m_legendaryDwellersShuffle, EDwellerRarity rarity, ref UniqueDwellerData __result)
             {
                 if (!modEnabled.Value || !overrideSpecialDwellers.Value || overrideSex.Value == EGender.Any)
                     return true;
