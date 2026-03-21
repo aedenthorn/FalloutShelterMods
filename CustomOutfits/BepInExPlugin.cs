@@ -803,56 +803,6 @@ namespace CustomOutfits
             }
         }
 
-        public class CustomPart
-        {
-            public string atlas;
-            public int x;
-            public int y;
-            public int grabX;
-            public int grabY;
-            public int width;
-            public int height;
-            public bool isExclusive;
-            public bool isExcludingFaceMask;
-            public bool isIncludedWithoutCostume;
-        }
-
-        public class CustomPartOpenable
-        {
-            public CustomPart open;
-            public CustomPart close;
-        }
-
-        public class CustomOverwrite
-        {
-            public string id;
-            public string rarity;
-            public CustomStat[] stats = new CustomStat[0];
-        }
-
-        public class CustomIngredient
-        {
-            public string component;
-            public int count;
-            public string rarity;
-        }
-
-        public class CustomStat
-        {
-            public string id;
-            public int value;
-        }
-
-        public class ItemTexture
-        {
-            public string id;
-            public string atlas;
-            public int x;
-            public int y;
-            public int width;
-            public int height;
-        }
-
         private static string OutfitsFolder
         {
             get
@@ -1629,8 +1579,8 @@ namespace CustomOutfits
             var spriteIndices = AccessTools.FieldRefAccess<UIAtlas, Dictionary<string, int>>(newAtlas, "mSpriteIndices");
             spriteIndices?.Clear();
 
-            UnityEngine.Object.DontDestroyOnLoad(newAtlas);
-            UnityEngine.Object.DontDestroyOnLoad(material);
+            DontDestroyOnLoad(newAtlas);
+            DontDestroyOnLoad(material);
             return newAtlas;
         }
 
@@ -1835,13 +1785,13 @@ namespace CustomOutfits
 
                 if (__instance.atlas == null)
                 {
-                    Dbgl($"[DEBUG] UISprite '{__instance.name}' custom sprite '{__instance.spriteName}' has NULL atlas", LogLevel.Warning);
+                    Dbgl($"UISprite '{__instance.name}' custom sprite '{__instance.spriteName}' has NULL atlas", LogLevel.Warning);
                     return;
                 }
 
                 var spriteData = __instance.atlas.GetSprite(__instance.spriteName);
                 if (spriteData == null)
-                    Dbgl($"[DEBUG] UISprite '{__instance.name}' atlas '{__instance.atlas.name}' has no sprite '{__instance.spriteName}'", LogLevel.Warning);
+                    Dbgl($"UISprite '{__instance.name}' atlas '{__instance.atlas.name}' has no sprite '{__instance.spriteName}'", LogLevel.Warning);
             }
         }
 
@@ -1883,7 +1833,7 @@ namespace CustomOutfits
                 if(freeCraft.Value)
                     MonoSingleton<VaultGUIManager>.Instance.m_recipeCraftingWindow.DebugFreeCrafting = true;
                 _customContentInitCount++;
-                Dbgl("[CustomOutfits] GameParameters.OnAwake prefix entered");
+                Dbgl("GameParameters.OnAwake prefix entered");
                 if (!modEnabled.Value)
                     return;
 
@@ -1921,7 +1871,7 @@ namespace CustomOutfits
                 }
                 catch (Exception ex)
                 {
-                    Dbgl("Failed to load custom outfits (general error): " + ex.Message, LogLevel.Error);
+                    Dbgl("Failed to load custom outfits: " + ex.Message, LogLevel.Error);
                     Dbgl("At: " + ex.StackTrace, LogLevel.Error);
                 }
             }
@@ -2078,7 +2028,7 @@ namespace CustomOutfits
                 }
                 catch (Exception ex)
                 {
-                    Dbgl("[RecipeEntry_FillData_AtlasFixPatch] " + ex, LogLevel.Error);
+                    Dbgl("Error in RecipeEntry_FillData_AtlasFixPatch:\n\n " + ex, LogLevel.Error);
                 }
             }
         }

@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace SameSexPartners
 {
-    [BepInPlugin("aedenthorn.SameSexPartners", "Same Sex Partners", "0.3.0")]
+    [BepInPlugin("aedenthorn.SameSexPartners", "Same Sex Partners", "0.4.0")]
     public class BepInExPlugin: BaseUnityPlugin
     {
         public static BepInExPlugin context;
@@ -204,6 +204,59 @@ namespace SameSexPartners
             {
                 if (modEnabled.Value && overrideSex.Value != EGender.Any)
                     gender = overrideSex.Value;
+            }
+        }
+        
+        [HarmonyPatch(typeof(Dweller), "UpdateTexture")]
+        public static class Dweller_UpdateTexture_Patch
+        {
+            public static void Prefix(Dweller __instance, DwellerFace ___m_face, ref DwellerFaceMask ___m_faceMask, DwellerFace ___m_overrideFace)
+            {
+                if (!modEnabled.Value || overrideSex.Value == EGender.Any || ___m_faceMask is null)
+                    return;
+                DwellerFaceMask dwellerFaceMask = ___m_faceMask;
+                DwellerFace dwellerFace = ___m_face;
+                if (___m_overrideFace != null)
+                {
+                    dwellerFace = ___m_overrideFace;
+                }
+                DwellerPieceList catalogForGender = Catalog.Instance.GetCatalogForGender(__instance.m_gender);
+
+                if (__instance.IsChild)
+                {
+                    if (___m_overrideFace == null)
+                    {
+                        dwellerFace = catalogForGender.m_faces[6];
+                    }
+                    if (dwellerFaceMask != null && dwellerFaceMask.m_useHairColor)
+                    {
+                        dwellerFaceMask = null;
+                    }
+                }
+                TexInfo face = Info(dwellerFace);
+                TexInfo mask = Info(dwellerFaceMask);
+                if(face.tex != mask.tex)
+                {
+                    ___m_faceMask = null;
+                }
+            }
+            private static TexInfo Info(DwellerPiece piece)
+            {
+                if (piece == null)
+                {
+                    return new TexInfo
+                    {
+                        tex = Catalog.Instance.EmptyTexture,
+                        uvOffset = Vector2.zero,
+                        uvScale = Vector2.one
+                    };
+                }
+                return new TexInfo
+                {
+                    tex = piece.Atlas,
+                    uvOffset = piece.AtlasOffset,
+                    uvScale = piece.AtlasScale
+                };
             }
         }
 
